@@ -24,7 +24,15 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+
+# Horario de Brasilia (UTC-3, fixo — o Brasil nao usa mais horario de verao).
+# Garante o mesmo horario no Mac e na nuvem (GitHub Actions roda em UTC).
+BRT = timezone(timedelta(hours=-3))
+
+
+def agora():
+    return datetime.now(BRT)
 
 # ------------------------------------------------------------------ AJUSTES
 URL_CHECKOUT = os.environ.get(
@@ -190,7 +198,7 @@ def gravar_estado(e):
 
 
 def registrar(linha):
-    carimbo = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    carimbo = agora().strftime("%Y-%m-%d %H:%M:%S")
     try:
         with open(ARQ_LOG, "a") as f:
             f.write("[%s] %s\n" % (carimbo, linha))
@@ -208,7 +216,7 @@ def avisar(titulo, corpo):
     try:
         with open(os.path.join(PASTA, "ALERTAS.log"), "a") as f:
             f.write("[%s] %s\n%s\n%s\n" % (
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S"), titulo, corpo, "-" * 60))
+                agora().strftime("%Y-%m-%d %H:%M:%S"), titulo, corpo, "-" * 60))
         entregues.append("arquivo")
     except Exception:
         pass
@@ -280,7 +288,7 @@ def main():
     if n >= FALHAS_PARA_ALERTAR and not estado.get("alertado"):
         avisar("🚨 CHECKOUT COM PROBLEMA",
                "%s\n\n%s\n\nConfira: %s" % (
-                   datetime.now().strftime("%d/%m %H:%M"), texto, URL_CHECKOUT))
+                   agora().strftime("%d/%m %H:%M"), texto, URL_CHECKOUT))
         estado["alertado"] = True
 
     estado["falhas_seguidas"] = n
@@ -300,7 +308,7 @@ def _blindado():
             registrar("ERRO INTERNO DO VIGIA: %s: %s" % (type(e).__name__, e))
             with open(os.path.join(PASTA, "ALERTAS.log"), "a") as f:
                 f.write("[%s] ERRO INTERNO\n%s\n%s\n" % (
-                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    agora().strftime("%Y-%m-%d %H:%M:%S"),
                     traceback.format_exc(), "-" * 60))
         except Exception:
             pass
