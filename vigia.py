@@ -28,7 +28,7 @@ from datetime import datetime, timezone
 
 # ------------------------------------------------------------------ AJUSTES
 URL_CHECKOUT = os.environ.get(
-    "VIGIA_URL", "https://centerpayhub.com/secure-prosperity-code/"
+    "VIGIA_URL", "https://centerpayhub.com/fsdfdsds/"
 )
 TIMEOUT = int(os.environ.get("VIGIA_TIMEOUT", "25"))
 # Avisa so depois de N falhas seguidas (evita alarme por instabilidade de rede)
