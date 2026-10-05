@@ -180,6 +180,27 @@ def checar():
     return (len(problemas) == 0), problemas, det
 
 
+def checar_confirmado(tentativas=3, pausa=8):
+    """Confirma a falha ANTES de reportar — um blip isolado nao vira alerta.
+    Saudavel: retorna no 1o acerto (rapido). Falha: so reporta se TODAS as
+    tentativas falharem, com pausa entre elas. Isso da ao vigia na nuvem, que e
+    sem memoria entre execucoes, a mesma prudencia do 'falhas seguidas' do Mac.
+    Adicionado em 05/10/2026 apos alarme falso por engasgo isolado do servidor."""
+    ultimo = None
+    for i in range(tentativas):
+        ok, problemas, det = checar()
+        if ok:
+            if i > 0:
+                det["recuperou_na_tentativa"] = i + 1
+            return True, [], det
+        ultimo = (ok, problemas, det)
+        if i < tentativas - 1:
+            time.sleep(pausa)
+    det = ultimo[2]
+    det["falhou_todas_as_tentativas"] = tentativas
+    return ultimo
+
+
 # ------------------------------------------------------------------ ESTADO
 def ler_estado():
     try:
@@ -262,7 +283,7 @@ def avisar(titulo, corpo):
 def main():
     modo_teste = "--teste" in sys.argv
 
-    ok, problemas, det = checar()
+    ok, problemas, det = checar_confirmado()
     estado = ler_estado()
 
     resumo_assets = " | ".join(
