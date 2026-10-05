@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
+    inputs:
+      url_de_teste:
+        description: "URL para testar (vazio = checkout real)"
+        required: false
+        default: ""
 
 concurrency:
   group: vigia
@@ -17,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Checar o checkout
         env:
-          VIGIA_URL: https://centerpayhub.com/secure-prosperity-code/
+          VIGIA_URL: ${{ github.event.inputs.url_de_teste || 'https://centerpayhub.com/secure-prosperity-code/' }}
           VIGIA_FALHAS: "1"
           VIGIA_TG_TOKEN: ${{ secrets.VIGIA_TG_TOKEN }}
           VIGIA_TG_CHAT: ${{ secrets.VIGIA_TG_CHAT }}
